@@ -10,3 +10,5 @@ build/
 bin
 
 *.class
+
+application-remote.yml
