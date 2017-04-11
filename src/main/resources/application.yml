@@ -1,0 +1,8 @@
+server:
+  contextPath: /gitreplay
+localBranch: master
+upstreamBranch: othermaster
+repository:
+  location: "C:\\git\\java\\commons-io-test2\\.git"
+remote:
+  url: "https://github.com/pimtegelaar/commons-io-test2.git"

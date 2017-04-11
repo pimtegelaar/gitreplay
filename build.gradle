@@ -1,0 +1,37 @@
+group 'com.tegeltech'
+version '1.0.0-SNAPSHOT'
+
+
+apply plugin: 'java'
+apply plugin: 'spring-boot'
+
+buildscript {
+    ext {
+        springBootVersion = '1.5.1.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+
+dependencies {
+    compile('org.springframework.boot:spring-boot-starter')
+    compile('org.springframework.boot:spring-boot-starter-web')
+
+    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.6.0'
+    compile('com.google.code.gson:gson:2.6.2')
+    compile('org.projectlombok:lombok:1.16.6')
+// https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit
+    compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '2.2.0.201212191850-r'
+
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
