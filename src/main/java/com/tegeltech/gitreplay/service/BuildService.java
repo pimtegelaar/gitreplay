@@ -41,7 +41,7 @@ public class BuildService {
         RevCommit nextCommit = commitRegistry.next();
         System.out.println("nextCommit is " + nextCommit);
         gitHelper.cherryPick(repositoryLocation, nextCommit);
-        gitHelper.push(repositoryLocation, remoteUrl);
+        gitHelper.push(repositoryLocation, localBranch);
         return Optional.ofNullable(nextCommit);
     }
 

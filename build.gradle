@@ -3,7 +3,7 @@ version '1.0.0-SNAPSHOT'
 
 
 apply plugin: 'java'
-apply plugin: 'spring-boot'
+apply plugin: 'org.springframework.boot'
 
 buildscript {
     ext {
@@ -30,7 +30,7 @@ dependencies {
     compile('com.google.code.gson:gson:2.6.2')
     compile('org.projectlombok:lombok:1.16.6')
 // https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit
-    compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '2.2.0.201212191850-r'
+    compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '4.6.1.201703071140-r'
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile group: 'junit', name: 'junit', version: '4.11'

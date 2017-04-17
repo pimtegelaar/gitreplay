@@ -54,16 +54,16 @@ public class GitHelper {
     public void cherryPick(String repositoryLocation, RevCommit commit) throws IOException, GitAPIException {
         Repository db = repo(repositoryLocation);
         Git git = new Git(db);
-        git.cherryPick().include(commit).call();
+        git.cherryPick().setMainlineParentNumber(1).include(commit).call();
     }
 
-    public Iterable<PushResult> push(String repositoryLocation, String remoteUrl) throws IOException, URISyntaxException, GitAPIException {
+    public Iterable<PushResult> push(String repositoryLocation, String branchName) throws IOException, URISyntaxException, GitAPIException {
         Repository db = repo(repositoryLocation);
         Git git = new Git(db);
 //        Config config = config(remoteUrl);
 
         String remote = "origin";
-        String branch = "refs/heads/master";
+        String branch = "refs/heads/"+branchName;
 
 //        RemoteConfig remoteConfig = remoteConfig(db, remote, config);
 
