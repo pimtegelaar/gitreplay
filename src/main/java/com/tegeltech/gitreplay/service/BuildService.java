@@ -1,5 +1,6 @@
 package com.tegeltech.gitreplay.service;
 
+import com.tegeltech.gitreplay.controller.domain.Configuration;
 import com.tegeltech.gitreplay.git.CommitRegistry;
 import com.tegeltech.gitreplay.git.GitHelper;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -19,17 +20,15 @@ public class BuildService {
     private CommitRegistry commitRegistry;
     private GitHelper gitHelper;
 
-    @Value("${upstreamBranch:master}")
-    private String upstreamBranch;
+    @Value("${repository.location}")
+    private String repositoryLocation;
 
     @Value("${localBranch:master}")
     private String localBranch;
 
-    @Value("${repository.location}")
-    private String repositoryLocation;
+    @Value("${upstreamBranch:master}")
+    private String upstreamBranch;
 
-    @Value("${remote.url}")
-    private String remoteUrl;
 
     @Autowired
     public BuildService(CommitRegistry commitRegistry, GitHelper gitHelper) {
@@ -45,12 +44,25 @@ public class BuildService {
         return Optional.ofNullable(nextCommit);
     }
 
-    public int init() throws IOException, GitAPIException {
+    public int init(Configuration configuration) throws IOException, GitAPIException {
+        updateConfiguration(configuration);
         gitHelper.checkout(repositoryLocation, upstreamBranch);
         List<RevCommit> commits = gitHelper.listCommits(repositoryLocation);
         commits.forEach(commitRegistry::addCommit);
         gitHelper.checkout(repositoryLocation, localBranch);
         return commits.size();
+    }
+
+    private void updateConfiguration(Configuration configuration) {
+        String repositoryLocation = configuration.getRepositoryLocation();
+        if (repositoryLocation != null)
+            this.repositoryLocation = repositoryLocation;
+        String localBranch = configuration.getLocalBranch();
+        if (localBranch != null)
+            this.localBranch = localBranch;
+        String upstreamBranch = configuration.getUpstreamBranch();
+        if (upstreamBranch != null)
+            this.upstreamBranch = upstreamBranch;
     }
 
     public List<RevCommit> getCommits() {

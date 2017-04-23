@@ -1,6 +1,7 @@
 package com.tegeltech.gitreplay.controller;
 
 import com.tegeltech.gitreplay.controller.domain.Commit;
+import com.tegeltech.gitreplay.controller.domain.Configuration;
 import com.tegeltech.gitreplay.service.BuildService;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -41,9 +42,10 @@ public class BuildController {
     }
 
     @RequestMapping(value = "/init", method = RequestMethod.POST)
-    public String init() {
+    public String init(@RequestBody(required = false) Configuration configuration) {
         try {
-            int commits = buildService.init();
+            if (configuration == null) configuration = new Configuration();
+            int commits = buildService.init(configuration);
             return String.format("Found %s commits", commits);
         } catch (IOException | GitAPIException e) {
             e.printStackTrace();
@@ -56,7 +58,6 @@ public class BuildController {
         return buildService.getCommits().stream()
                 .map(commit -> new Commit(commit.getName(), commit.getFullMessage()))
                 .collect(Collectors.toList());
-//        return Arrays.asList(new Commit("0987a6e9876ea9876c987ae6ce8a76d","added some stuff"),new Commit("6876a7e698a7e698a76","my commit message"));
     }
 
     @RequestMapping(value = "/commit/{name}", method = RequestMethod.GET)
