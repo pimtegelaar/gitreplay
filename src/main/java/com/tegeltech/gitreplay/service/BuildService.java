@@ -53,6 +53,10 @@ public class BuildService {
         return commits.size();
     }
 
+    public List<RevCommit> getCommits() {
+        return commitRegistry.getCommits();
+    }
+
     public Optional<RevCommit> getCommit(String commitHash) {
         return commitRegistry.getCommit(commitHash);
     }

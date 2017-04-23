@@ -42,4 +42,8 @@ public class CommitRegistry {
     public Optional<RevCommit> getCommit(String commitHash) {
         return commits.stream().filter(commit -> commit.getId().getName().equals(commitHash)).findAny();
     }
+
+    public List<RevCommit> getCommits() {
+        return commits;
+    }
 }
