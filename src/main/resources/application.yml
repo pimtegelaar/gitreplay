@@ -1,6 +1,7 @@
 server:
+  port: 8090
   contextPath: /gitreplay
-localBranch: master
-upstreamBranch: othermaster
+localBranch: mergetest
+upstreamBranch: upstreammaster
 repository:
-  location: "C:\\git\\java\\commons-io-test2\\.git"
+  location: "/home/mutator/git/commons-lang/.git"
