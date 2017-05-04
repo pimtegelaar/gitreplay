@@ -3,6 +3,7 @@ package com.tegeltech.gitreplay.service;
 import com.tegeltech.gitreplay.controller.domain.Configuration;
 import com.tegeltech.gitreplay.git.CommitRegistry;
 import com.tegeltech.gitreplay.git.GitHelper;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class BuildService {
 
     private CommitRegistry commitRegistry;
@@ -38,7 +40,7 @@ public class BuildService {
 
     public Optional<RevCommit> finished() throws IOException, GitAPIException, URISyntaxException {
         RevCommit nextCommit = commitRegistry.next();
-        System.out.println("nextCommit is " + nextCommit);
+        log.info("nextCommit is {}", nextCommit);
         gitHelper.merge(repositoryLocation, nextCommit);
         gitHelper.push(repositoryLocation, localBranch);
         return Optional.ofNullable(nextCommit);
@@ -46,9 +48,13 @@ public class BuildService {
 
     public int init(Configuration configuration) throws IOException, GitAPIException {
         updateConfiguration(configuration);
+        log.info("Checkout of repository {} upstream branch {}", repositoryLocation, upstreamBranch);
         gitHelper.checkout(repositoryLocation, upstreamBranch);
+        log.info("Loading commits...");
         List<RevCommit> commits = gitHelper.listCommits(repositoryLocation);
+        log.info("Found {} commits", commits.size());
         commits.forEach(commitRegistry::addCommit);
+        log.info("Checkout of repository {} local branch {}", repositoryLocation, localBranch);
         gitHelper.checkout(repositoryLocation, localBranch);
         return commits.size();
     }
