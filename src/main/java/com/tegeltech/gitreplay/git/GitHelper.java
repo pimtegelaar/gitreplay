@@ -16,6 +16,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 @Component
@@ -32,12 +33,23 @@ public class GitHelper {
         Repository repo = repo(repositoryLocation);
         Git git = new Git(repo);
 
-        Iterable<RevCommit> logs = git.log()
-                .call();
-        List<RevCommit> commits = new ArrayList<>();
-        logs.forEach(commits::add);
+        Iterable<RevCommit> logs = git.log().call();
+        Iterator<RevCommit> commitIterator = logs.iterator();
+        RevCommit firstCommit = commitIterator.next();
+        while (commitIterator.hasNext()) {
+            commitIterator.next();
+        }
+        List<RevCommit> commits = commits(firstCommit, new ArrayList<>());
         Collections.reverse(commits);
         return commits;
+    }
+
+    private List<RevCommit> commits(RevCommit commit, List<RevCommit> commits) {
+        commits.add(commit);
+        RevCommit[] parents = commit.getParents();
+        if (parents == null || parents.length == 0) return commits;
+        RevCommit parent = parents[0];
+        return commits(parent, commits);
     }
 
     public void checkout(String repositoryLocation, String branchName) throws IOException, GitAPIException {
@@ -57,13 +69,22 @@ public class GitHelper {
         git.cherryPick().setMainlineParentNumber(1).include(commit).call();
     }
 
+
+    public void merge(String repositoryLocation, RevCommit commit) throws IOException, GitAPIException {
+        Repository db = repo(repositoryLocation);
+        Git git = new Git(db);
+        git.merge().include(commit).call();
+    }
+
+
+
     public Iterable<PushResult> push(String repositoryLocation, String branchName) throws IOException, URISyntaxException, GitAPIException {
         Repository db = repo(repositoryLocation);
         Git git = new Git(db);
 //        Config config = config(remoteUrl);
 
         String remote = "origin";
-        String branch = "refs/heads/"+branchName;
+        String branch = "refs/heads/" + branchName;
 
 //        RemoteConfig remoteConfig = remoteConfig(db, remote, config);
 

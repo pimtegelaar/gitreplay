@@ -39,7 +39,7 @@ public class BuildService {
     public Optional<RevCommit> finished() throws IOException, GitAPIException, URISyntaxException {
         RevCommit nextCommit = commitRegistry.next();
         System.out.println("nextCommit is " + nextCommit);
-        gitHelper.cherryPick(repositoryLocation, nextCommit);
+        gitHelper.merge(repositoryLocation, nextCommit);
         gitHelper.push(repositoryLocation, localBranch);
         return Optional.ofNullable(nextCommit);
     }
