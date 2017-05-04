@@ -20,7 +20,8 @@ Push the branch you want to replay to.
 - Configure the location of your local git repository.
 - Configure the branch you want to replay from and replay to.
 
-To start the tool, run `./gradlew bootRun` (`gradlew.bat bootRun` on Windows)
+To start the tool, run `./start.sh` (`start.bat bootRun` on Windows)
+Add an application-remote.yml file in src/main/resources containing the remote access means to the repository you want to push to.
 
 If the branches  are  setup correctly, run the init command:
 `http://localhost:8080/gitreplay/build/init`
@@ -29,4 +30,4 @@ Set the commit you want to start with (usually the first commit)
 `http://localhost:8080/gitreplay/build/current-commit/<commithash>`
 
 In your build server add a shell executer at the end of the build:
-`curl -X POST http://localhost:8080/gitreplay/build/finished`
+`curl -X POST http://localhost:8090/gitreplay/build/finished`
