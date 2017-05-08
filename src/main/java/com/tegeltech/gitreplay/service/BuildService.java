@@ -31,6 +31,8 @@ public class BuildService {
     @Value("${upstreamBranch:master}")
     private String upstreamBranch;
 
+    private ReplayStatus status = ReplayStatus.NONE;
+    private ReplayStatus previousStatus = ReplayStatus.NONE;
 
     @Autowired
     public BuildService(CommitRegistry commitRegistry, GitHelper gitHelper) {
@@ -39,24 +41,46 @@ public class BuildService {
     }
 
     public Optional<RevCommit> finished() throws IOException, GitAPIException, URISyntaxException {
+        if(status.equals(ReplayStatus.PAUSED)) {
+            return Optional.empty();
+        }
         RevCommit nextCommit = commitRegistry.next();
+        if(nextCommit == null) {
+            log.info("reached end of stream, finished :)");
+            status =  ReplayStatus.FINISHED;
+            return Optional.empty();
+        }
+        status = ReplayStatus.RUNNING;
         log.info("nextCommit is {}", nextCommit);
         gitHelper.merge(repositoryLocation, nextCommit);
         gitHelper.push(repositoryLocation, localBranch);
-        return Optional.ofNullable(nextCommit);
+        return Optional.of(nextCommit);
     }
 
     public int init(Configuration configuration) throws IOException, GitAPIException {
+        status = ReplayStatus.INITIALIZING;
         updateConfiguration(configuration);
         log.info("Checkout of repository {} upstream branch {}", repositoryLocation, upstreamBranch);
         gitHelper.checkout(repositoryLocation, upstreamBranch);
         log.info("Loading commits...");
         List<RevCommit> commits = gitHelper.listCommits(repositoryLocation);
         log.info("Found {} commits", commits.size());
+        commitRegistry.clear();
         commits.forEach(commitRegistry::addCommit);
         log.info("Checkout of repository {} local branch {}", repositoryLocation, localBranch);
         gitHelper.checkout(repositoryLocation, localBranch);
+        status = ReplayStatus.INITIALIZED;
         return commits.size();
+    }
+
+    public ReplayStatus pauseResume() {
+        if (status.equals(ReplayStatus.PAUSED)) {
+            status = previousStatus;
+        } else  {
+            previousStatus = status;
+            status = ReplayStatus.PAUSED;
+        }
+        return status;
     }
 
     private void updateConfiguration(Configuration configuration) {

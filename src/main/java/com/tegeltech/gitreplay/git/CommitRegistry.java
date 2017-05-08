@@ -14,13 +14,17 @@ public class CommitRegistry {
 
     private RevCommit currentCommit = null;
 
+    public void clear() {
+        commits.clear();
+    }
+
     public void addCommit(RevCommit commit) {
         commits.add(commit);
     }
 
     public RevCommit next() {
         int index = commits.indexOf(currentCommit);
-        if (index == -1 | index > commits.size() + 1) {
+        if (index == -1 | index > commits.size()) {
             return null;
         }
         currentCommit = commits.get(index + 1);

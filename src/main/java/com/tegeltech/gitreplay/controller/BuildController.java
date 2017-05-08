@@ -3,6 +3,7 @@ package com.tegeltech.gitreplay.controller;
 import com.tegeltech.gitreplay.controller.domain.Commit;
 import com.tegeltech.gitreplay.controller.domain.Configuration;
 import com.tegeltech.gitreplay.service.BuildService;
+import com.tegeltech.gitreplay.service.ReplayStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -99,6 +100,13 @@ public class BuildController {
         log.info("Retrieving current commit");
         Optional<RevCommit> commit = buildService.getCurrentCommit();
         return commit.map(revCommit -> new Commit(revCommit.getName(), revCommit.getFullMessage())).orElse(null);
+    }
+
+    @RequestMapping(value = "/pause-resume", method = RequestMethod.PUT)
+    public ReplayStatus pauseResume() {
+        ReplayStatus replayStatus = buildService.pauseResume();
+        log.info("Replay status is now {}", replayStatus);
+        return replayStatus;
     }
 
 }
