@@ -1,5 +1,6 @@
 package com.tegeltech.gitreplay.git;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.springframework.stereotype.Component;
 
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
+@Slf4j
 public class CommitRegistry {
 
     private List<RevCommit> commits = new ArrayList<>();
@@ -24,10 +26,16 @@ public class CommitRegistry {
 
     public RevCommit next() {
         int index = commits.indexOf(currentCommit);
-        if (index == -1 | index > commits.size()) {
+        if(index == -1)  {
+            log.info("Couldn't find current commit: {} {}", currentCommit.getId(), currentCommit.getShortMessage());
             return null;
         }
-        currentCommit = commits.get(index + 1);
+        index++;
+        if (index >= commits.size()) {
+            log.info("Reached the end of the commit stream");
+            return null;
+        }
+        currentCommit = commits.get(index);
         return currentCommit;
     }
 

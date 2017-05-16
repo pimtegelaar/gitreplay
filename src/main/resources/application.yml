@@ -1,7 +1,12 @@
 server:
   port: 8090
   contextPath: /gitreplay
-localBranch: mergetest
+localBranch: mergefull
 upstreamBranch: upstreammaster
 repository:
   location: "/home/mutator/git/commons-lang/.git"
+buildServer:
+  triggerBuild: true
+  location: http://localhost:8080
+  jobName: commons-lang-full
+  token: 6aa675ed03448a987b697123086a9c86

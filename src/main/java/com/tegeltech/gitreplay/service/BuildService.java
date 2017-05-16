@@ -1,5 +1,7 @@
 package com.tegeltech.gitreplay.service;
 
+import com.tegeltech.gitreplay.buildserver.BuildConfiguration;
+import com.tegeltech.gitreplay.buildserver.TriggerBuildService;
 import com.tegeltech.gitreplay.controller.domain.Configuration;
 import com.tegeltech.gitreplay.git.CommitRegistry;
 import com.tegeltech.gitreplay.git.GitHelper;
@@ -19,8 +21,10 @@ import java.util.Optional;
 @Slf4j
 public class BuildService {
 
-    private CommitRegistry commitRegistry;
-    private GitHelper gitHelper;
+    private final CommitRegistry commitRegistry;
+    private final GitHelper gitHelper;
+    private final TriggerBuildService triggerBuildService;
+
 
     @Value("${repository.location}")
     private String repositoryLocation;
@@ -31,13 +35,19 @@ public class BuildService {
     @Value("${upstreamBranch:master}")
     private String upstreamBranch;
 
+    @Value("${buildServer.triggerBuild:false}")
+    private Boolean triggerBuild;
+
     private ReplayStatus status = ReplayStatus.NONE;
     private ReplayStatus previousStatus = ReplayStatus.NONE;
 
+    private BuildConfiguration buildConfiguration = null;
+
     @Autowired
-    public BuildService(CommitRegistry commitRegistry, GitHelper gitHelper) {
+    public BuildService(CommitRegistry commitRegistry, GitHelper gitHelper, TriggerBuildService triggerBuildService) {
         this.commitRegistry = commitRegistry;
         this.gitHelper = gitHelper;
+        this.triggerBuildService = triggerBuildService;
     }
 
     public Optional<RevCommit> finished() throws IOException, GitAPIException, URISyntaxException {
@@ -54,6 +64,9 @@ public class BuildService {
         log.info("nextCommit is {}", nextCommit);
         gitHelper.merge(repositoryLocation, nextCommit);
         gitHelper.push(repositoryLocation, localBranch);
+        if(triggerBuild) {
+            triggerBuildService.triggerBuild(buildConfiguration);
+        }
         return Optional.of(nextCommit);
     }
 
@@ -105,6 +118,10 @@ public class BuildService {
 
     public Optional<RevCommit> getCurrentCommit() {
         return Optional.ofNullable(commitRegistry.getCurrentCommit());
+    }
+
+    public void setBuildConfiguration(BuildConfiguration buildConfiguration) {
+        this.buildConfiguration = buildConfiguration;
     }
 
     public Optional<RevCommit> setCurrentCommit(String commitHash) {
