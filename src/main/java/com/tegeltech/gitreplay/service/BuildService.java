@@ -6,6 +6,7 @@ import com.tegeltech.gitreplay.controller.domain.Configuration;
 import com.tegeltech.gitreplay.git.CommitRegistry;
 import com.tegeltech.gitreplay.git.GitHelper;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,20 +52,25 @@ public class BuildService {
     }
 
     public Optional<RevCommit> finished() throws IOException, GitAPIException, URISyntaxException {
-        if(status.equals(ReplayStatus.PAUSED)) {
+        if (status.equals(ReplayStatus.PAUSED)) {
             return Optional.empty();
         }
         RevCommit nextCommit = commitRegistry.next();
-        if(nextCommit == null) {
+        if (nextCommit == null) {
             log.info("reached end of stream, finished :)");
-            status =  ReplayStatus.FINISHED;
+            status = ReplayStatus.FINISHED;
             return Optional.empty();
         }
         status = ReplayStatus.RUNNING;
         log.info("nextCommit is {}", nextCommit);
-        gitHelper.merge(repositoryLocation, nextCommit);
+        MergeResult.MergeStatus mergeStatus = gitHelper.merge(repositoryLocation, nextCommit);
+        if (!mergeStatus.isSuccessful()) {
+            log.error("Merge failed! Status: {}", mergeStatus);
+            status = ReplayStatus.FAILED;
+            return Optional.empty();
+        }
         gitHelper.push(repositoryLocation, localBranch);
-        if(triggerBuild) {
+        if (triggerBuild) {
             triggerBuildService.triggerBuild(buildConfiguration);
         }
         return Optional.of(nextCommit);
@@ -89,7 +95,7 @@ public class BuildService {
     public ReplayStatus pauseResume() {
         if (status.equals(ReplayStatus.PAUSED)) {
             status = previousStatus;
-        } else  {
+        } else {
             previousStatus = status;
             status = ReplayStatus.PAUSED;
         }

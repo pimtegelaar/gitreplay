@@ -6,5 +6,6 @@ public enum ReplayStatus {
     INITIALIZED,
     RUNNING,
     PAUSED,
-    FINISHED
+    FINISHED,
+    FAILED
 }

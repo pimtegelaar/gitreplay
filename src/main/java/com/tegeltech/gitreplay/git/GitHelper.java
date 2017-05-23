@@ -1,6 +1,7 @@
 package com.tegeltech.gitreplay.git;
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.Repository;
@@ -70,10 +71,11 @@ public class GitHelper {
     }
 
 
-    public void merge(String repositoryLocation, RevCommit commit) throws IOException, GitAPIException {
+    public MergeResult.MergeStatus merge(String repositoryLocation, RevCommit commit) throws IOException, GitAPIException {
         Repository db = repo(repositoryLocation);
         Git git = new Git(db);
-        git.merge().include(commit).call();
+        MergeResult mergeResult = git.merge().include(commit).call();
+        return mergeResult.getMergeStatus();
     }
 
 
